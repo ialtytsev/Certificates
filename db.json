@@ -1,0 +1,72 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "JohnDoe",
+      "email": "john@example.com",
+      "password": "12345"
+    },
+    {
+      "id": 2,
+      "username": "JaneSmith",
+      "email": "jane@example.com",
+      "password": "qwerty"
+    }
+  ],
+  "certificates": [
+    {
+      "id": 2,
+      "datetime": "2023-09-01",
+      "title": "AWS Certificate",
+      "tags": [
+        "Cloud",
+        "Amazon"
+      ],
+      "description": "Achieve expertise in AWS services and cloud computing.",
+      "price": 59.99
+    },
+    {
+      "id": 3,
+      "datetime": "2023-09-02",
+      "title": "React Certification",
+      "tags": [
+        "Frontend",
+        "React.js"
+      ],
+      "description": "Master React.js and build powerful user interfaces.",
+      "price": 69.99
+    },
+    {
+      "id": 4,
+      "datetime": "2023-09-03",
+      "title": "JavaScript Mastery",
+      "tags": [
+        "Web",
+        "JavaScript"
+      ],
+      "description": "Become a JavaScript expert for web development.",
+      "price": 79.99
+    },
+    {
+      "id": 5,
+      "datetime": "2023-09-04",
+      "title": "Data Science Expert",
+      "tags": [
+        "Data Analysis",
+        "ML"
+      ],
+      "description": "Learn data science and machine learning techniques.",
+      "price": 89.99
+    },
+    {
+      "id": 1693502421269,
+      "datetime": "2023-08-31",
+      "title": "Certified Developer",
+      "tags": [
+        "Programming"
+      ],
+      "description": "Certify your skills as a professional software developer.",
+      "price": 123
+    }
+  ]
+}
