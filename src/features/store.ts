@@ -1,22 +1,3 @@
-// import { configureStore } from "@reduxjs/toolkit";
-// import { authApi } from "./auth/authApi";
-
-// import { certificateApi } from "./certificates/certificateApi";
-
-// export const store = configureStore({
-//   reducer: {
-//     [certificateApi.reducerPath]: certificateApi.reducer,
-//     [authApi.reducerPath]: authApi.reducer,
-//   },
-//   middleware: (getDefaultMiddleware) =>
-//     getDefaultMiddleware().concat(
-//       certificateApi.middleware,
-//       authApi.middleware
-//     ),
-//   devTools: true,
-// });
-
-// // export const persistor = persistStore(store);
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import {
   persistStore,
@@ -29,12 +10,10 @@ import {
   REGISTER,
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
-import { authApi } from "./auth/authApi";
-import { certificateApi } from "./certificates/certificateApi";
+import { apiSlice } from "./api/apiSlice";
 
 const rootReducer = combineReducers({
-  [certificateApi.reducerPath]: certificateApi.reducer,
-  [authApi.reducerPath]: authApi.reducer,
+  [apiSlice.reducerPath]: apiSlice.reducer,
 });
 
 const persistConfig = {
@@ -51,7 +30,7 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(certificateApi.middleware, authApi.middleware),
+    }).concat(apiSlice.middleware),
   devTools: true,
 });
 

@@ -1,11 +1,10 @@
-// index.js or App.js (where you initialize your React app)
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
 
 import App from "./App";
-import { persistor, store } from "./features/store";
 import { PersistGate } from "redux-persist/integration/react";
+import { persistor, store } from "./features/store";
 
 const root = ReactDOM.createRoot(document.getElementById("root")!);
 root.render(

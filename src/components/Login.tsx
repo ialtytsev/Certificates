@@ -24,7 +24,7 @@ function Login() {
     password: "",
   });
   const navigate = useNavigate();
-  const { data: users } = useGetUsersQuery();
+  const { data: users, isLoading } = useGetUsersQuery();
 
   const {
     register,
@@ -35,18 +35,22 @@ function Login() {
   });
 
   const onSubmit = (formData: FormData) => {
-    const user = users?.find((u: IUser) => u.email === formData.email);
+    try {
+      const user = users?.find((u: IUser) => u.email === formData.email);
 
-    if (user && user.password === formData.password) {
-      navigate("/mainpage");
-    } else {
+      if (user && user.password === formData.password) {
+        navigate("/mainpage");
+      }
+    } catch (error) {
       toast.error("Invalid credentials. Please try again.", {
         position: "top-center",
       });
     }
   };
 
-  return (
+  return isLoading ? (
+    "Loading..."
+  ) : (
     <Grid container justifyContent="center" alignItems="center" height="100vh">
       <Grid item xs={10} sm={8} md={6} lg={4}>
         <Paper

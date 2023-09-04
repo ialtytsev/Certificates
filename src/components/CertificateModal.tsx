@@ -1,24 +1,25 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  IconButton,
   TextField,
+  IconButton,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useForm, Controller } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import { ICertificate } from "../models/ICertificate";
 import { toast } from "react-toastify";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 
-interface AddModalProps {
+interface CertificateModalProps {
   open: boolean;
   onClose: () => void;
-  onAdd: (certificate: ICertificate) => void;
+  onSave: (certificate: ICertificate) => void;
+  certificate?: ICertificate | null; // Certificate to edit (null for Add)
 }
 
 const schema = yup.object().shape({
@@ -28,7 +29,7 @@ const schema = yup.object().shape({
   tags: yup
     .array()
     .of(yup.string())
-    .required("Tags are required")
+    .notRequired()
     .transform((value, originalValue) => {
       if (typeof originalValue === "string") {
         return originalValue.split(",").map((tag) => tag.trim());
@@ -38,30 +39,53 @@ const schema = yup.object().shape({
   price: yup.number().required("Price is required"),
 });
 
-const AddModal: React.FC<AddModalProps> = ({ open, onClose, onAdd }) => {
+const CertificateModal: React.FC<CertificateModalProps> = ({
+  open,
+  onClose,
+  onSave,
+  certificate,
+}) => {
   const {
     handleSubmit,
     control,
-    formState: { errors },
     reset,
+    formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
   });
 
+  useEffect(() => {
+    if (certificate) {
+      reset({
+        title: certificate.title,
+        description: certificate.description,
+        datetime: certificate.datetime,
+        tags: certificate.tags,
+        price: certificate.price,
+      });
+    } else {
+      reset();
+    }
+  }, [reset, certificate]);
+
   const onSubmit = (data: any) => {
-    const newCertificate: ICertificate = {
-      id: Date.now(),
+    const updatedCertificate: ICertificate = {
+      id: certificate ? certificate.id : Date.now(),
       title: data.title,
       description: data.description,
       datetime: data.datetime,
-      tags: data.tags,
+      tags: data ? data.tags : [],
       price: parseFloat(data.price),
     };
 
-    onAdd(newCertificate);
+    onSave(updatedCertificate);
     onClose();
-    reset();
-    toast.success("Certificate created successfully", {
+
+    const toastMessage = certificate
+      ? "Certificate updated successfully"
+      : "Certificate created successfully";
+
+    toast.success(toastMessage, {
       position: "top-center",
     });
   };
@@ -69,11 +93,14 @@ const AddModal: React.FC<AddModalProps> = ({ open, onClose, onAdd }) => {
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogTitle>
-        Add New Certificate
+        {certificate ? "Edit Certificate" : "Add New Certificate"}
         <IconButton
           aria-label="close"
           style={{ position: "absolute", top: 0, right: 0 }}
-          onClick={onClose}
+          onClick={() => {
+            onClose();
+            reset();
+          }}
         >
           <CloseIcon />
         </IconButton>
@@ -83,7 +110,6 @@ const AddModal: React.FC<AddModalProps> = ({ open, onClose, onAdd }) => {
           <Controller
             name="title"
             control={control}
-            defaultValue=""
             render={({ field }) => (
               <TextField
                 {...field}
@@ -98,7 +124,6 @@ const AddModal: React.FC<AddModalProps> = ({ open, onClose, onAdd }) => {
           <Controller
             name="description"
             control={control}
-            defaultValue=""
             render={({ field }) => (
               <TextField
                 {...field}
@@ -115,7 +140,6 @@ const AddModal: React.FC<AddModalProps> = ({ open, onClose, onAdd }) => {
           <Controller
             name="datetime"
             control={control}
-            defaultValue=""
             render={({ field }) => (
               <TextField
                 {...field}
@@ -130,19 +154,12 @@ const AddModal: React.FC<AddModalProps> = ({ open, onClose, onAdd }) => {
           <Controller
             name="tags"
             control={control}
-            defaultValue={[]}
-            render={({ field: { value, onChange } }) => (
+            render={({ field }) => (
               <TextField
+                {...field}
                 sx={{ marginTop: 2 }}
-                label="Tags (comma-separated)"
+                label="Tags"
                 fullWidth
-                value={value.join(",")}
-                onChange={(e) => {
-                  const tagsArray = e.target.value
-                    .split(",")
-                    .map((tag) => tag.trim());
-                  onChange(tagsArray);
-                }}
                 error={!!errors.tags}
                 helperText={errors.tags?.message}
               />
@@ -151,7 +168,6 @@ const AddModal: React.FC<AddModalProps> = ({ open, onClose, onAdd }) => {
           <Controller
             name="price"
             control={control}
-            defaultValue={0}
             render={({ field }) => (
               <TextField
                 {...field}
@@ -165,9 +181,16 @@ const AddModal: React.FC<AddModalProps> = ({ open, onClose, onAdd }) => {
             )}
           />
           <DialogActions>
-            <Button onClick={onClose}>Close</Button>
+            <Button
+              onClick={() => {
+                onClose();
+                reset();
+              }}
+            >
+              Close
+            </Button>
             <Button variant="contained" color="secondary" type="submit">
-              Create
+              {certificate ? "Update" : "Create"}
             </Button>
           </DialogActions>
         </form>
@@ -176,4 +199,4 @@ const AddModal: React.FC<AddModalProps> = ({ open, onClose, onAdd }) => {
   );
 };
 
-export default AddModal;
+export default CertificateModal;

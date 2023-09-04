@@ -1,17 +1,16 @@
-// userApi.ts
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { IUser } from "../../models/IUser";
+import { apiSlice } from "../api/apiSlice";
 
-export const authApi = createApi({
-  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:5000" }),
+const extendedApi = apiSlice.injectEndpoints({
   endpoints: (build) => ({
     getUsers: build.query<Array<IUser>, void>({
-      query: () => "users",
+      query: () => "/users",
     }),
     getUser: build.query<IUser, void>({
-      query: (id) => `users/${id}`,
+      query: (id) => `/users/${id}`,
     }),
   }),
+  overrideExisting: false,
 });
 
-export const { useGetUsersQuery, useGetUserQuery } = authApi;
+export const { useGetUsersQuery, useGetUserQuery } = extendedApi;

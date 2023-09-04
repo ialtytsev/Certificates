@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ICertificate } from "../models/ICertificate";
 import {
   useCreateCertificateMutation,
@@ -23,10 +23,9 @@ import {
   Button,
   TextField,
 } from "@mui/material";
-import AddModal from "./AddModal";
-import EditModal from "./EditModal";
 import AddIcon from "@mui/icons-material/Add";
 import { useLocation, useNavigate } from "react-router-dom";
+import CertificateModal from "./CertificateModal";
 
 const CertificatesContainer = () => {
   const location = useLocation();
@@ -34,7 +33,6 @@ const CertificatesContainer = () => {
 
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [selectedCertificate, setSelectedCertificate] =
     useState<ICertificate | null>(null);
 
@@ -43,7 +41,7 @@ const CertificatesContainer = () => {
     data: certificates,
     error,
     isLoading,
-  } = useFetchAllCertificatesQuery(100);
+  } = useFetchAllCertificatesQuery();
   const [createCertificate, {}] = useCreateCertificateMutation();
   const [updateCertificate, {}] = useUpdateCertificateMutation();
   const [deleteCertificate, {}] = useDeleteCertificateMutation();
@@ -66,22 +64,33 @@ const CertificatesContainer = () => {
   // When the search state changes, update the URL query parameter
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
-    queryParams.set("search", search);
+
+    if (search.trim() !== "") {
+      queryParams.set("search", search);
+    } else {
+      queryParams.delete("search");
+    }
+
     navigate({ search: queryParams.toString() });
-  }, [search, navigate]);
+  }, [search, navigate, location.search]);
+
+  const handleAdd = () => {
+    setIsModalOpen(true);
+    setSelectedCertificate(null);
+  };
 
   const handleCreate = async (certificate: ICertificate) => {
     await createCertificate(certificate);
     setIsModalOpen(false);
   };
 
-  const handleUpdate = (certificate: ICertificate) => {
-    updateCertificate(certificate);
-    setEditModalOpen(false);
+  const handleUpdate = async (certificate: ICertificate) => {
+    await updateCertificate(certificate);
+    setIsModalOpen(false);
   };
 
-  const handleRemove = (certificate: ICertificate) => {
-    deleteCertificate(certificate);
+  const handleRemove = async ({ id }: ICertificate) => {
+    await deleteCertificate(id);
   };
 
   return (
@@ -110,17 +119,12 @@ const CertificatesContainer = () => {
           <Button
             variant="contained"
             color="secondary"
-            onClick={() => setIsModalOpen(true)}
+            onClick={handleAdd}
             endIcon={<AddIcon />}
             size="medium"
           >
             Add
           </Button>
-          <AddModal
-            open={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onAdd={handleCreate}
-          />
         </Grid>
       </Grid>
       {isLoading && <h1>Loading</h1>}
@@ -148,7 +152,7 @@ const CertificatesContainer = () => {
                   <CertificateItem
                     update={() => {
                       setSelectedCertificate(certificate);
-                      setEditModalOpen(true);
+                      setIsModalOpen(true);
                     }}
                     remove={handleRemove}
                     key={certificate.id}
@@ -162,7 +166,7 @@ const CertificatesContainer = () => {
                   <CertificateItem
                     update={() => {
                       setSelectedCertificate(c);
-                      setEditModalOpen(true);
+                      setIsModalOpen(true);
                     }}
                     remove={handleRemove}
                     key={c.id}
@@ -174,11 +178,11 @@ const CertificatesContainer = () => {
           </Table>
         </TableContainer>
       </Box>
-      {selectedCertificate && (
-        <EditModal
-          open={isEditModalOpen}
-          onClose={() => setEditModalOpen(false)}
-          onEdit={handleUpdate}
+      {isModalOpen && (
+        <CertificateModal
+          open={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSave={selectedCertificate ? handleUpdate : handleCreate}
           certificate={selectedCertificate}
         />
       )}

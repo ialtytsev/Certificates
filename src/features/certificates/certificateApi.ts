@@ -1,21 +1,24 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/dist/query/react";
 import { ICertificate } from "../../models/ICertificate";
+import { apiSlice } from "../api/apiSlice";
 
-export const certificateApi = createApi({
-  reducerPath: "certificate/api",
-  baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:5000",
-  }),
-  tagTypes: ["Certificate"],
+type CertificatesResponse = ICertificate[];
+
+const extendedApi = apiSlice.injectEndpoints({
   endpoints: (build) => ({
-    fetchAllCertificates: build.query<ICertificate[], number>({
-      query: (limit: number) => ({
+    fetchAllCertificates: build.query<CertificatesResponse, void>({
+      query: () => ({
         url: "/certificates",
-        params: {
-          _limit: limit,
-        },
       }),
-      providesTags: () => ["Certificate"],
+      providesTags: (result) =>
+        // is result available?
+        result
+          ? // successful query
+            [
+              ...result.map(({ id }) => ({ type: "Certificate", id } as const)),
+              { type: "Certificate", id: "LIST" },
+            ]
+          : // an error occurred, but we still want to refetch this query when `{ type: 'Certificate', id: 'LIST' }` is invalidated
+            [{ type: "Certificate", id: "LIST" }],
     }),
     searchCertificates: build.query({
       query: (search: string) => ({
@@ -24,33 +27,44 @@ export const certificateApi = createApi({
           q: search,
         },
       }),
-      providesTags: () => ["Certificate"],
+      providesTags: ["Certificate"],
     }),
-    createCertificate: build.mutation<ICertificate, ICertificate>({
-      query: (certificate) => ({
-        url: "/certificates",
-        method: "POST",
-        body: certificate,
-      }),
-      invalidatesTags: ["Certificate"],
+    createCertificate: build.mutation<ICertificate, Partial<ICertificate>>({
+      query(body) {
+        return {
+          url: `/certificates`,
+          method: "POST",
+          body,
+        };
+      },
+      // Invalidates all Post-type queries providing the `LIST` id - after all, depending of the sort order,
+      // that newly created post could show up in any lists.
+      invalidatesTags: [{ type: "Certificate", id: "LIST" }],
     }),
-    updateCertificate: build.mutation<ICertificate, ICertificate>({
-      query: (certificate) => ({
-        url: `/certificates/${certificate.id}`,
-        method: "PUT",
-        body: certificate,
-      }),
-      invalidatesTags: ["Certificate"],
+    updateCertificate: build.mutation<ICertificate, Partial<ICertificate>>({
+      query(data) {
+        const { id, ...body } = data;
+        return {
+          url: `/certificates/${id}`,
+          method: "PUT",
+          body,
+        };
+      },
+      invalidatesTags: (result, error, { id }) => [{ type: "Certificate", id }],
     }),
-    deleteCertificate: build.mutation<ICertificate, ICertificate>({
-      query: (certificate) => ({
-        url: `/certificates/${certificate.id}`,
-        method: "DELETE",
-        body: certificate,
-      }),
-      invalidatesTags: ["Certificate"],
-    }),
+    deleteCertificate: build.mutation<{ success: boolean; id: number }, number>(
+      {
+        query(id) {
+          return {
+            url: `/certificates/${id}`,
+            method: "DELETE",
+          };
+        },
+        invalidatesTags: (result, error, id) => [{ type: "Certificate", id }],
+      }
+    ),
   }),
+  overrideExisting: false,
 });
 
 export const {
@@ -59,4 +73,4 @@ export const {
   useCreateCertificateMutation,
   useUpdateCertificateMutation,
   useDeleteCertificateMutation,
-} = certificateApi;
+} = extendedApi;
