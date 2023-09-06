@@ -26,6 +26,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import { useLocation, useNavigate } from "react-router-dom";
 import CertificateModal from "./CertificateModal";
+import { toast } from "react-toastify";
 
 const CertificatesContainer = () => {
   const location = useLocation();
@@ -80,17 +81,50 @@ const CertificatesContainer = () => {
   };
 
   const handleCreate = async (certificate: ICertificate) => {
-    await createCertificate(certificate);
+    createCertificate(certificate)
+      .unwrap()
+      .then(() =>
+        toast.success("Certificate created successfully", {
+          position: "top-center",
+        })
+      )
+      .catch(() =>
+        toast.error("Certificate has not created", {
+          position: "top-center",
+        })
+      );
     setIsModalOpen(false);
   };
 
   const handleUpdate = async (certificate: ICertificate) => {
-    await updateCertificate(certificate);
+    updateCertificate(certificate)
+      .unwrap()
+      .then(() =>
+        toast.success("Certificate updated successfully", {
+          position: "top-center",
+        })
+      )
+      .catch(() =>
+        toast.error("Certificate has not updated", {
+          position: "top-center",
+        })
+      );
     setIsModalOpen(false);
   };
 
   const handleRemove = async ({ id }: ICertificate) => {
-    await deleteCertificate(id);
+    deleteCertificate(id)
+      .unwrap()
+      .then(() =>
+        toast.success("Certificate deleted successfully", {
+          position: "top-center",
+        })
+      )
+      .catch(() =>
+        toast.error("Certificate has not deleted", {
+          position: "top-center",
+        })
+      );
   };
 
   return (

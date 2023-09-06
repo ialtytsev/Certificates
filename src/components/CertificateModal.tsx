@@ -81,13 +81,13 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
     onSave(updatedCertificate);
     onClose();
 
-    const toastMessage = certificate
-      ? "Certificate updated successfully"
-      : "Certificate created successfully";
+    // const toastMessage = certificate
+    //   ? "Certificate updated successfully"
+    //   : "Certificate created successfully";
 
-    toast.success(toastMessage, {
-      position: "top-center",
-    });
+    // toast.success(toastMessage, {
+    //   position: "top-center",
+    // });
   };
 
   return (

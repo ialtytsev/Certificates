@@ -23,10 +23,6 @@ const CertificateItem: FC<CertificateItemProps> = ({
   const handleDelete = () => {
     remove(certificate);
     setDeleteModalOpen(false);
-
-    toast.success("Certificate deleted successfully", {
-      position: "top-center",
-    });
   };
 
   return (
